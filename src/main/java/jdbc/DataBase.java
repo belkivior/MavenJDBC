@@ -1,10 +1,6 @@
 package jdbc;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.*;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,7 +9,6 @@ public class DataBase {
     private static PreparedStatement resultSet;
     private static Connection connection;
     private static final Logger logger = Logger.getLogger(DataBase.class.getName());
-
 
 
     public DataBase(String url, String user, String pwd) {
@@ -56,6 +51,41 @@ public class DataBase {
             logger.log(Level.INFO,"MySQL PrepareStatement Failed! : " +e.getMessage());
         }
         return null;
+    }
+
+    ResultSet getDataScrollable() throws SQLException {
+        String query = "SELECT * FROM personne";
+        Statement stmt = this.connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+        return stmt.executeQuery(query);
+    }
+
+    ResultSet getUpdatableData() throws SQLException {
+        String query = "SELECT * FROM personne";
+        Statement stmt = this.connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+
+        return stmt.executeQuery(query);
+    }
+
+    boolean updateLine(int line_id, String firstName, String lastName, Date dob) throws SQLException {
+        String query = "UPDATE personne SET first_name=?,last_name=?,dob=? WHERE id=?";
+        PreparedStatement stmt = this.connection.prepareStatement(query);
+
+        stmt.setInt(1,line_id);
+        stmt.setString(2,firstName);
+        stmt.setString(3,lastName);
+        stmt.setDate(4,dob);
+
+        return stmt.execute();
+    }
+
+    boolean deleteLine(int line_id) throws SQLException {
+        String query = "DELETE FROM personne WHERE id=?";
+        PreparedStatement stmt = this.connection.prepareStatement(query);
+
+        stmt.setInt(1,line_id);
+
+        return stmt.execute();
     }
 
 
